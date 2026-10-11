@@ -9,6 +9,7 @@ Covers pi0, pi0_fast, pi05, paligemma, and paligemma_fast — all served by
 """
 
 import argparse
+import inspect
 import sys
 import traceback
 
@@ -53,7 +54,7 @@ AppLauncher.add_app_launcher_args(parser)
 args_cli, _ = parser.parse_known_args()
 args_cli.enable_cameras = True
 
-app_launcher = AppLauncher(args_cli)
+app_launcher = AppLauncher(args_cli, multi_gpu=False)
 simulation_app = app_launcher.app
 
 import robolab.constants  # noqa: E402
@@ -96,5 +97,9 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\033[96m[RoboLab] Terminated with error: {e}\033[0m")
         traceback.print_exc()
-        simulation_app.close()
+        # Isaac Sim 6 closes the process itself; preserve a failing exit status.
+        close_kwargs = {"wait_for_replicator": False}
+        if "exit_code" in inspect.signature(simulation_app.close).parameters:
+            close_kwargs["exit_code"] = 1
+        simulation_app.close(**close_kwargs)
         sys.exit(1)

@@ -1,0 +1,37 @@
+--- app_launcher.py
++++ app_launcher.py
+@@ -404,7 +404,6 @@
+     _SIM_APP_CFG_TYPES: dict[str, list[type]] = {
+         "headless": [bool],
+         "hide_ui": [bool, type(None)],
+-        "active_gpu": [int, type(None)],
+         "physics_gpu": [int],
+         "multi_gpu": [bool],
+         "sync_loads": [bool],
+@@ -697,10 +696,8 @@
+             # pass command line variable to kit
+             sys.argv.append(f"--/plugins/carb.tasking.plugin/threadCount={num_threads_per_process}")
+ 
+-        # set rendering device. We do not need to set physics_gpu because it will automatically pick the same one
+-        # as the active_gpu device. Setting physics_gpu explicitly may result in a different device to be used.
++        # Physics uses the masked CUDA index. Select the renderer in _resolve_kit_args.
+         launcher_args["physics_gpu"] = self.device_id
+-        launcher_args["active_gpu"] = self.device_id
+ 
+         print(f"[INFO][AppLauncher]: Using device: {device}")
+ 
+@@ -783,7 +780,13 @@
+         self._kit_args = []
+         if "kit_args" in launcher_args:
+             self._kit_args = [arg for arg in launcher_args["kit_args"].split()]
+-            sys.argv += self._kit_args
++        # Select by CUDA index; the trailing comma keeps the setting string-typed.
++        if launcher_args.get("multi_gpu") is False:
++            argument = f"--/renderer/multiGpu/activeCudaGpus={self.device_id},"
++            setting = argument.partition("=")[0]
++            if not any(arg.partition("=")[0] == setting for arg in sys.argv + self._kit_args):
++                self._kit_args.append(argument)
++        sys.argv += self._kit_args
+ 
+     def _create_app(self):
+         """Launch and create the SimulationApp based on the parsed simulation config."""

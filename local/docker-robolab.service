@@ -1,0 +1,23 @@
+[Unit]
+Description=Dedicated Docker daemon for RoboLab
+After=network-online.target containerd-robolab.service
+Requires=containerd-robolab.service
+Wants=network-online.target
+RequiresMountsFor=/data/myx/robolab-docker
+
+[Service]
+Type=notify
+Environment=DOCKER_TMPDIR=/data/myx/robolab-docker/tmp
+ExecStart=/usr/bin/dockerd --config-file=/etc/docker/robolab.json
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=0
+Delegate=yes
+KillMode=process
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=0
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target

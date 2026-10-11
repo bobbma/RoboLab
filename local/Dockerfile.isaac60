@@ -1,0 +1,29 @@
+FROM nvcr.io/nvidia/isaac-sim:6.0.0@sha256:68735a60b6c15c85e0dd0098570c6d2cc79e928f2d068ce2790aa43284ac165d
+
+USER root
+ENV PYTHONPATH=/isaac-sim/extsDeprecated/omni.isaac.ml_archive/pip_prebundle
+ENV ACCEPT_EULA=Y OMNI_KIT_ACCEPT_EULA=Y
+
+# Keep the image's CUDA, PyTorch, NumPy and renderer libraries together.
+RUN ./python.sh -m pip install --no-cache-dir \
+    'setuptools<81' wheel hatchling 'gymnasium==1.2.1' 'prettytable==3.3.0' \
+    einops onnx hidapi 'pyglet<2' pytest pytest-mock junitparser flaky \
+    flatdict packaging hydra-core tensorboard numba pandas \
+    json_numpy pyzmq msgpack msgpack-numpy 'websockets>=14,<17' \
+    tyro python-dotenv imageio-ffmpeg dm-tree tree tqdm
+
+COPY IsaacLab /opt/IsaacLab
+COPY openpi-client /opt/openpi-client
+RUN ./python.sh -m pip install --no-deps --no-build-isolation \
+    -e /opt/IsaacLab/source/isaaclab \
+    -e /opt/IsaacLab/source/isaaclab_assets \
+    -e /opt/IsaacLab/source/isaaclab_tasks \
+    /opt/openpi-client
+
+ARG ROBO_UID=1017
+ARG ROBO_GID=1017
+RUN groupadd --gid ${ROBO_GID} robolab \
+    && useradd --uid ${ROBO_UID} --gid ${ROBO_GID} --home-dir /isaac-sim --no-create-home robolab
+ENV ISAACLAB_PATH=/opt/IsaacLab
+WORKDIR /isaac-sim
+USER isaac-sim

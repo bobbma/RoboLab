@@ -1,0 +1,8 @@
+version = 3
+root = "/data/myx/robolab-docker/containerd"
+state = "/run/containerd-robolab"
+imports = []
+disabled_plugins = ["io.containerd.cri.v1.images", "io.containerd.cri.v1.runtime", "io.containerd.grpc.v1.cri"]
+
+[grpc]
+  address = "/run/containerd-robolab/containerd.sock"

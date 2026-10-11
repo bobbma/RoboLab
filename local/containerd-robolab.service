@@ -1,0 +1,19 @@
+[Unit]
+Description=Dedicated containerd runtime for RoboLab
+After=network.target
+RequiresMountsFor=/data/myx/robolab-docker
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/containerd --config /etc/docker/containerd-robolab.toml
+Restart=always
+RestartSec=5
+Delegate=yes
+KillMode=process
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=0
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target

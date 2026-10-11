@@ -1,0 +1,21 @@
+{
+  "data-root": "/data/myx/robolab-docker",
+  "exec-root": "/run/docker-robolab",
+  "pidfile": "/run/docker-robolab/dockerd.pid",
+  "containerd": "/run/containerd-robolab/containerd.sock",
+  "containerd-namespace": "robolab",
+  "containerd-plugins-namespace": "plugins.robolab",
+  "hosts": ["unix:///run/docker-robolab.sock"],
+  "storage-driver": "overlay2",
+  "features": {"containerd-snapshotter": false},
+  "bridge": "none",
+  "iptables": false,
+  "ip6tables": false,
+  "ip-forward": false,
+  "ip-masq": false,
+  "runtimes": {
+    "nvidia": {"path": "/usr/bin/nvidia-container-runtime", "runtimeArgs": []}
+  },
+  "log-driver": "json-file",
+  "log-opts": {"max-size": "10m", "max-file": "3"}
+}
